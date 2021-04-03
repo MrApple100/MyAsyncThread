@@ -1,19 +1,26 @@
 package com.example.myasyncthread;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.TextView;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity {
+
+
+
     class MessagetoAsync {
         public ArrayList<Integer> studentsNum;
         public int NumAutomat;
@@ -23,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
             NumAutomat = numAutomat;
         }
     }
+
+
 
     TextView State1;
     TextView State2;
@@ -51,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<Student> students = new ArrayList<>();
     ArrayList<String> goods = new ArrayList<String>(Arrays.asList(new String[]{"ColaCoca", "Hepsi", "Sright", "Panta", "Wrorter", "AlpenSilver", "Merkury", "Seekers", "Trinx", "MilkyDay"}));
+
+
+    Handler handlerupdate;
+    Handler handlerend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Good> goodsAutomat2 = new ArrayList<>(Arrays.asList(new Good(goods.get(5), 50, 4), new Good(goods.get(6), 25, 4), new Good(goods.get(7), 25, 4), new Good(goods.get(8), 25, 4)));
         ArrayList<Good> goodsAutomat3 = new ArrayList<>(Arrays.asList(new Good(goods.get(9), 25, 4), new Good(goods.get(0), 50, 4), new Good(goods.get(1), 50, 4), new Good(goods.get(2), 50, 4)));
         ArrayList<Good> goodsAutomat4 = new ArrayList<>(Arrays.asList(new Good(goods.get(2), 50, 4), new Good(goods.get(6), 25, 4), new Good(goods.get(8), 25, 4), new Good(goods.get(3), 50, 4)));
+
+
         GoodAdapter goodAdapter1 = new GoodAdapter(this, goodsAutomat1);
         Goodlist1.setAdapter(goodAdapter1);
         GoodAdapter goodAdapter2 = new GoodAdapter(this, goodsAutomat2);
@@ -109,128 +124,84 @@ public class MainActivity extends AppCompatActivity {
         Goodlist3.setAdapter(goodAdapter3);
         GoodAdapter goodAdapter4 = new GoodAdapter(this, goodsAutomat4);
         Goodlist4.setAdapter(goodAdapter4);
+        handlerupdate=new Handler(){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                Bundle bundle=msg.getData();
+
+                Student student=students.get(bundle.getInt("numofstudent"));
+                Automat automat = new Automat("Продает", bundle.getInt("kolQ")+"", bundle.getString("studentname"),goods.get(student.goods.get(bundle.getInt("j"))), bundle.getInt("NumAutomat"));
+                automat.updateView();
+                System.out.println("END");
+            }
+        };
+        handlerend=new Handler(){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                super.handleMessage(msg);
+                System.out.println(msg.what);
+                Automat automat = new Automat("Прохлаждается", "нет никого", "пусто"," ", msg.what);
+                automat.updateView();
+                System.out.println("END");
+            }
+        };
+
         ArrayList<Integer> queue = new ArrayList<>();
         for (int j = 0; j < 5; j++) {
             queue.add(j);
         }
-        new MyAutomatAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new MessagetoAsync(queue, 1));
+        MyAutomatAsync myAutomatAsync1=new MyAutomatAsync(new MessagetoAsync(queue, 1));
+        myAutomatAsync1.start();
         queue = new ArrayList<>();
         for (int j = 5; j < 10; j++) {
             queue.add(j % 5, j);
-            System.out.println(j % 5);
         }
-        new MyAutomatAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new MessagetoAsync(queue, 2));
+        MyAutomatAsync myAutomatAsync2=new MyAutomatAsync(new MessagetoAsync(queue, 2));
+        myAutomatAsync2.start();
         queue = new ArrayList<>();
         for (int j = 10; j < 15; j++) {
             queue.add(j % 5, j);
         }
-        new MyAutomatAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new MessagetoAsync(queue, 3));
+        MyAutomatAsync myAutomatAsync3=new MyAutomatAsync(new MessagetoAsync(queue, 3));
+        myAutomatAsync3.start();
         queue = new ArrayList<>();
         for (int j = 15; j < 20; j++) {
             queue.add(j % 5, j);
         }
-        new MyAutomatAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new MessagetoAsync(queue, 4));
+        MyAutomatAsync myAutomatAsync4=new MyAutomatAsync(new MessagetoAsync(queue, 4));
+        myAutomatAsync4.start();
+
+
     }
 
 
     @Deprecated
-    private class MyAutomatAsync extends AsyncTask<Object, Integer, Integer> {
-        class Automat{
-            String State;
-            String KolQ;
-            String Who;
-            String What;
-            int Num;
-
-            public Automat(String state, String kolQ, String who, String what, int num) {
-                State = state;
-                KolQ = kolQ;
-                Who = who;
-                What = what;
-                Num = num;
-            }
-            public void updateView(){
-                switch (Num){
-                    case 1:
-                        State1.setText(State);
-                        KolQ1.setText(KolQ);
-                        Who1.setText(Who);
-                        What1.setText(What);
-                        for(int i=0;i<Goodlist1.getChildCount();i++){
-                            if(((GoodAdapter.ViewHolder)(Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
-                                int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).KolGood.getText()+"");
-                                if(lastkol!=0) {
-                                    ((GoodAdapter.ViewHolder) (Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
-                                }
-                            }
-                        }
-
-                        break;
-                    case 2:
-                        State2.setText(State);
-                        KolQ2.setText(KolQ);
-                        Who2.setText(Who);
-                        What2.setText(What);
-                        for(int i=0;i<Goodlist2.getChildCount();i++){
-                            if(((GoodAdapter.ViewHolder)(Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
-                                int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).KolGood.getText()+"");
-                                if(lastkol!=0) {
-                                    ((GoodAdapter.ViewHolder) (Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
-                                }
-                            }
-
-                        }
-                        break;
-                    case 3:
-                        State3.setText(State);
-                        KolQ3.setText(KolQ);
-                        Who3.setText(Who);
-                        What3.setText(What);
-                        for(int i=0;i<Goodlist3.getChildCount();i++){
-                            if(((GoodAdapter.ViewHolder)(Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
-                                int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).KolGood.getText()+"");
-                                if(lastkol!=0) {
-                                    ((GoodAdapter.ViewHolder) (Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
-                                }
-                            }
-                        }
-                        break;
-                    case 4:
-                        State4.setText(State);
-                        KolQ4.setText(KolQ);
-                        Who4.setText(Who);
-                        What4.setText(What);
-                        for(int i=0;i<Goodlist4.getChildCount();i++){
-                            if(((GoodAdapter.ViewHolder)(Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
-                                int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).KolGood.getText()+"");
-                                if(lastkol!=0) {
-                                    ((GoodAdapter.ViewHolder) (Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
-                                }
-
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
+    private class MyAutomatAsync extends Thread {
+        MessagetoAsync queueandnum;
+        public MyAutomatAsync(MessagetoAsync queueandnum) {
+            this.queueandnum=queueandnum;
         }
 
         @Override
-        protected Integer doInBackground(Object... queueandnum) {
+        public void run() {
             Automat automat;
-            int kolQ=((MessagetoAsync)queueandnum[0]).studentsNum.size();
-            int NumAutomat=((MessagetoAsync)queueandnum[0]).NumAutomat;
+            int kolQ=queueandnum.studentsNum.size();
+            int NumAutomat=queueandnum.NumAutomat;
             for(int i=0;i<kolQ;i++){
-                System.out.println(i+" "+NumAutomat);
-                System.out.println(((MessagetoAsync)queueandnum[0]).studentsNum.get(i));
-                Student student=students.get(((MessagetoAsync)queueandnum[0]).studentsNum.get(i));
+                Student student=students.get(queueandnum.studentsNum.get(i));
                 for(int j=0;j<3;j++) {
                     automat = new Automat("Продает", (kolQ - i)+"", student.Name,goods.get(student.goods.get(j)), NumAutomat);
-                    automat.updateView();
+                    Bundle bundle=new Bundle();
+                    bundle.putInt("numofsrudent",queueandnum.studentsNum.get(i));
+                    bundle.putInt("kolQ",(kolQ - i));
+                    bundle.putString("studentname",student.Name);
+                    bundle.putInt("j",j);
+                    bundle.putInt("NumAutomat",NumAutomat);
+                    Message message=new Message();
+                    message.setData(bundle);
+                    handlerupdate.sendMessage(message);
+                    //симулируем задержку
                     try {
                         Thread.sleep(student.speedtime*1000);
                     } catch (InterruptedException e) {
@@ -239,16 +210,90 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-
-            return NumAutomat;
+            handlerend.sendEmptyMessage(NumAutomat);
         }
 
-        @Override
-        protected void onPostExecute(Integer num) {
-            super.onPostExecute(num);
+    }
+    class Automat{
+        String State;
+        String KolQ;
+        String Who;
+        String What;
+        int Num;
 
-            Automat automat = new Automat("Прохлаждается", "нет никого", "пусто"," ", num.intValue());
-            automat.updateView();
+        public Automat(String state, String kolQ, String who, String what, int num) {
+            State = state;
+            KolQ = kolQ;
+            Who = who;
+            What = what;
+            Num = num;
+        }
+        public void updateView(){
+            switch (Num){
+                case 1:
+                    State1.setText(State);
+                    KolQ1.setText(KolQ);
+                    Who1.setText(Who);
+                    What1.setText(What);
+
+                    for(int i=0;i<Goodlist1.getChildCount();i++){
+                        if(((GoodAdapter.ViewHolder)(Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
+                            int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).KolGood.getText()+"");
+                            if(lastkol!=0) {
+                                ((GoodAdapter.ViewHolder) (Goodlist1.getChildViewHolder(Goodlist1.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
+                            }
+                        }
+                    }
+                    System.out.println("UPDATE");
+                    break;
+                case 2:
+                    State2.setText(State);
+                    KolQ2.setText(KolQ);
+                    Who2.setText(Who);
+                    What2.setText(What);
+
+                    for(int i=0;i<Goodlist2.getChildCount();i++){
+                        if(((GoodAdapter.ViewHolder)(Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
+                            int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).KolGood.getText()+"");
+                            if(lastkol!=0) {
+                                ((GoodAdapter.ViewHolder) (Goodlist2.getChildViewHolder(Goodlist2.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
+                            }
+                        }
+
+                    }
+                    break;
+                case 3:
+                    State3.setText(State);
+                    KolQ3.setText(KolQ);
+                    Who3.setText(Who);
+                    What3.setText(What);
+
+                    for(int i=0;i<Goodlist3.getChildCount();i++){
+                        if(((GoodAdapter.ViewHolder)(Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
+                            int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).KolGood.getText()+"");
+                            if(lastkol!=0) {
+                                ((GoodAdapter.ViewHolder) (Goodlist3.getChildViewHolder(Goodlist3.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
+                            }
+                        }
+                    }
+                    break;
+                case 4:
+                    State4.setText(State);
+                    KolQ4.setText(KolQ);
+                    Who4.setText(Who);
+                    What4.setText(What);
+
+                    for(int i=0;i<Goodlist4.getChildCount();i++){
+                        if(((GoodAdapter.ViewHolder)(Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).NameGood.getText().toString().compareTo(What)==0){
+                            int lastkol=Integer.parseInt(((GoodAdapter.ViewHolder)(Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).KolGood.getText()+"");
+                            if(lastkol!=0) {
+                                ((GoodAdapter.ViewHolder) (Goodlist4.getChildViewHolder(Goodlist4.getChildAt(i)))).KolGood.setText((lastkol - 1)+"");
+                            }
+
+                        }
+                    }
+                    break;
+            }
         }
     }
 }
