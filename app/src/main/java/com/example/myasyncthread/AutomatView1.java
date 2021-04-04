@@ -1,23 +1,37 @@
 package com.example.myasyncthread;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowContentFrameStats;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class AutomatView1 extends Fragment {
-    static String State = "Разогрев";
-    static String KolQ = "подождите";
-    static String Who = "подождите";
-    static String What = "подождите";
+
+    static String State;
+    static String KolQ;
+    static String Who;
+    static String What;
     int Num = 1;
     ArrayList<Good> goodsAutomat1 = new ArrayList<>(Arrays.asList(new Good(Good.goods.get(1), 50, 4), new Good(Good.goods.get(2), 50, 4), new Good(Good.goods.get(3), 50, 4), new Good(Good.goods.get(4), 50, 4)));
 
@@ -37,12 +51,23 @@ public class AutomatView1 extends Fragment {
         Who = who;
         What = what;
     }
+    private static AutomatView1 instance;
+
+    public static AutomatView1 getInstance() {
+        if (instance == null) {
+            instance = new AutomatView1();
+        }
+        return instance;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
     }
     @Nullable
     @Override
@@ -60,13 +85,42 @@ public class AutomatView1 extends Fragment {
         Goodlist1 = (RecyclerView) view.findViewById(R.id.Goodlist1);
         GoodAdapter goodAdapter1 = new GoodAdapter(view.getContext(), goodsAutomat1);
         Goodlist1.setAdapter(goodAdapter1);
+        update();
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                AutomatView1 automatView =(AutomatView1) fm.findFragmentById(R.id.automat1holder);
+                //ft.setCustomAnimations(R.anim.animout,R.anim.animin);
+                ft.remove(automatView);
+                ft.remove(AutomatView2.getInstance());
+                ft.remove(AutomatView3.getInstance());
+                ft.remove(AutomatView4.getInstance());
+                ft.commit();
+                fm.executePendingTransactions();
+
+                ft = fm.beginTransaction();
+                BackButton.automat=automatView;
+                ft.add(R.id.Framelayout,automatView);
+                ft.add(R.id.Framelayout,new BackButton());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            }
+        });
+
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
     }
 
-
     public static void update(){
-        System.out.println(State1);
         State1.setText(State);
         KolQ1.setText(KolQ);
         Who1.setText(Who);
@@ -80,5 +134,11 @@ public class AutomatView1 extends Fragment {
                 }
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 }

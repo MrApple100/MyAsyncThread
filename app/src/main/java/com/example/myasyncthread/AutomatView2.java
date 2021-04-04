@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -38,10 +41,14 @@ public class AutomatView2 extends Fragment {
         Who = who;
         What = what;
     }
-
+    private static AutomatView2 instance;
+    public static AutomatView2 getInstance() {
+        return instance;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance=this;
     }
     @Nullable
     @Override
@@ -59,13 +66,36 @@ public class AutomatView2 extends Fragment {
         Goodlist2 = (RecyclerView) view.findViewById(R.id.Goodlist2);
         GoodAdapter goodAdapter2 = new GoodAdapter(view.getContext(), goodsAutomat2);
         Goodlist2.setAdapter(goodAdapter2);
+        update();
+
+       view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                AutomatView2 automatView =(AutomatView2) fm.findFragmentById(R.id.automat2holder);
+                //ft.setCustomAnimations(R.anim.animout,R.anim.animin);
+                ft.remove(automatView);
+                ft.remove(AutomatView1.getInstance());
+                ft.remove(AutomatView3.getInstance());
+                ft.remove(AutomatView4.getInstance());
+                ft.commit();
+                fm.executePendingTransactions();
+
+                ft = fm.beginTransaction();
+                BackButton.automat=automatView;
+                ft.add(R.id.Framelayout,automatView);
+                ft.add(R.id.Framelayout,new BackButton());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            }
+        });
+
         return view;
-
-
     }
 
     public static void update(){
-        System.out.println(State);
         State2.setText(State);
         KolQ2.setText(KolQ);
         Who2.setText(Who);

@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -38,9 +41,14 @@ public class AutomatView4 extends Fragment {
         Who = who;
         What = what;
     }
+    private static AutomatView4 instance;
+    public static AutomatView4 getInstance() {
+        return instance;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
     }
 
     @Nullable
@@ -60,13 +68,36 @@ public class AutomatView4 extends Fragment {
 
         GoodAdapter goodAdapter4 = new GoodAdapter(view.getContext(), goodsAutomat4);
         Goodlist4.setAdapter(goodAdapter4);
+        update();
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                AutomatView4 automatView =(AutomatView4) fm.findFragmentById(R.id.automat4holder);
+                //ft.setCustomAnimations(R.anim.animout,R.anim.animin);
+                ft.remove(automatView);
+                ft.remove(AutomatView2.getInstance());
+                ft.remove(AutomatView3.getInstance());
+                ft.remove(AutomatView1.getInstance());
+                ft.commit();
+                fm.executePendingTransactions();
+
+                ft = fm.beginTransaction();
+                BackButton.automat=automatView;
+                ft.add(R.id.Framelayout,automatView);
+                ft.add(R.id.Framelayout,new BackButton());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            }
+        });
 
         return view;
 
     }
 
    public static void update(){
-       System.out.println(State4);
        State4.setText(State);
        KolQ4.setText(KolQ);
        Who4.setText(Who);

@@ -19,11 +19,13 @@ import android.widget.TextView;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.sql.SQLOutput;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends FragmentActivity {
 
@@ -56,14 +58,15 @@ public class MainActivity extends FragmentActivity {
         AutomatView2 automatView2=new AutomatView2();
         AutomatView3 automatView3=new AutomatView3();
         AutomatView4 automatView4=new AutomatView4();
-        ft.add(R.id.Framelayout,automatView1);
-        ft.add(R.id.Framelayout,automatView2);
-        ft.add(R.id.Framelayout,automatView3);
-        ft.add(R.id.Framelayout,automatView4);
+        ft.add(R.id.automat1holder,automatView1);
+        ft.add(R.id.automat2holder,automatView2);
+        ft.add(R.id.automat3holder,automatView3);
+        ft.add(R.id.automat4holder,automatView4);
         ft.commit();
 
+
         for (int i = 0; i < 20; i++) {
-            Random random = new Random(i);
+            Random random = new Random();
             int r1 = random.nextInt(10);
             int r2 = 0;
             do {
@@ -73,8 +76,9 @@ public class MainActivity extends FragmentActivity {
             do {
                 r3 = random.nextInt(10);
             } while (r3 == r2 || r3 == r1);
-            int speedtime = random.nextInt(5) + 1;
+            int speedtime = random.nextInt(3) + 1;
             students.add(new Student(Student.Names.get(i), r1, r2, r3, speedtime));
+            System.out.println(r1+" "+r2+" "+r3);
         }
 
 
@@ -83,105 +87,87 @@ public class MainActivity extends FragmentActivity {
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
                 Bundle bundle = msg.getData();
-
                 Student student = students.get(bundle.getInt("numofstudent"));
+                System.out.println("JJJJJJJJJJ "+bundle.getInt("j"));
                 switch (bundle.getInt("NumAutomat")) {
                     case 1:
-                        AutomatView1.setAutomatView1("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(student.goods.get(bundle.getInt("j"))));
+                        AutomatView1.setAutomatView1("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(bundle.getInt("j")));
                         AutomatView1.update();
                         break;
                     case 2:
-                        AutomatView2.setAutomatView2("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(student.goods.get(bundle.getInt("j"))));
+                        AutomatView2.setAutomatView2("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(bundle.getInt("j")));
                         AutomatView2.update();
                         break;
                     case 3:
-                        AutomatView3.setAutomatView3("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(student.goods.get(bundle.getInt("j"))));
+                        AutomatView3.setAutomatView3("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(bundle.getInt("j")));
                         AutomatView3.update();
                         break;
                     case 4:
-                        AutomatView4.setAutomatView4("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(student.goods.get(bundle.getInt("j"))));
+                        AutomatView4.setAutomatView4("Продает", bundle.getInt("kolQ") + "", bundle.getString("studentname"), Good.goods.get(bundle.getInt("j")));
                         AutomatView4.update();
                         break;
                 }
 
-                System.out.println("END");
             }
 
         };
-            handlerend=new Handler() {
-                @Override
-                public void handleMessage (@NonNull Message msg){
-                    super.handleMessage(msg);
-                    System.out.println(msg.what);
-                            switch (msg.what) {
-                                case 1:
-                                    AutomatView1.setAutomatView1("Прохлаждается", "нет никого", "пусто", " ");
-                                    AutomatView1.update();
-                                    break;
-                                case 2:
-                                    AutomatView2.setAutomatView2("Прохлаждается", "нет никого", "пусто", " ");
-                                    AutomatView2.update();
-                                    break;
-                                case 3:
-                                    AutomatView3.setAutomatView3("Прохлаждается", "нет никого", "пусто", " ");
-                                    AutomatView3.update();
-                                    break;
-                                case 4:
-                                    AutomatView4.setAutomatView4("Прохлаждается", "нет никого", "пусто", " ");
-                                    AutomatView4.update();
-                                    break;
-                            }
-                    System.out.println("END");
+        handlerend=new Handler() {
+            @Override
+            public void handleMessage (@NonNull Message msg){
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case 1:
+                        AutomatView1.setAutomatView1("Прохлаждается", "нет никого", "пусто", " ");
+                        AutomatView1.update();
+                        break;
+                    case 2:
+                        AutomatView2.setAutomatView2("Прохлаждается", "нет никого", "пусто", " ");
+                        AutomatView2.update();
+                        break;
+                    case 3:
+                        AutomatView3.setAutomatView3("Прохлаждается", "нет никого", "пусто", " ");
+                        AutomatView3.update();
+                        break;
+                    case 4:
+                        AutomatView4.setAutomatView4("Прохлаждается", "нет никого", "пусто", " ");
+                        AutomatView4.update();
+                        break;
                 }
-            };
-
-            ArrayList<Integer> queue = new ArrayList<>();
-        for(
-            int j = 0;
-            j< 5;j++)
-
-            {
-                queue.add(j);
             }
+        };
 
-            MyAutomatAsync myAutomatAsync1 = new MyAutomatAsync(new MessagetoAsync(queue, 1));
+        ArrayList<Integer> queue = new ArrayList<>();
+        for(int j = 0; j< 5;j++){
+            queue.add(j);
+        }
+
+        MyAutomatAsync myAutomatAsync1 = new MyAutomatAsync(new MessagetoAsync(queue, 1));
         myAutomatAsync1.start();
-            queue =new ArrayList<>();
-        for(
-            int j = 5;
-            j< 10;j++)
+        queue =new ArrayList<>();
+        for(int j = 5;j< 10;j++) {
+            queue.add(j % 5, j);
+        }
 
-            {
-                queue.add(j % 5, j);
-            }
-
-            MyAutomatAsync myAutomatAsync2 = new MyAutomatAsync(new MessagetoAsync(queue, 2));
+        MyAutomatAsync myAutomatAsync2 = new MyAutomatAsync(new MessagetoAsync(queue, 2));
         myAutomatAsync2.start();
-            queue =new ArrayList<>();
-        for(
-            int j = 10;
-            j< 15;j++)
-
-            {
-                queue.add(j % 5, j);
-            }
+        queue =new ArrayList<>();
+        for(int j = 10;j< 15;j++) {
+            queue.add(j % 5, j);
+        }
 
             MyAutomatAsync myAutomatAsync3 = new MyAutomatAsync(new MessagetoAsync(queue, 3));
         myAutomatAsync3.start();
             queue =new ArrayList<>();
-        for(
-            int j = 15;
-            j< 20;j++)
+        for(int j = 15; j< 20;j++) {
+            queue.add(j % 5, j);
+        }
 
-            {
-                queue.add(j % 5, j);
-            }
-
-            MyAutomatAsync myAutomatAsync4 = new MyAutomatAsync(new MessagetoAsync(queue, 4));
+        MyAutomatAsync myAutomatAsync4 = new MyAutomatAsync(new MessagetoAsync(queue, 4));
         myAutomatAsync4.start();
 
 
-        }
+
+    }
 
 
         @Deprecated
@@ -203,7 +189,7 @@ public class MainActivity extends FragmentActivity {
                         bundle.putInt("numofsrudent", queueandnum.studentsNum.get(i));
                         bundle.putInt("kolQ", (kolQ - i));
                         bundle.putString("studentname", student.Name);
-                        bundle.putInt("j", j);
+                        bundle.putInt("j", student.goods.get(j));
                         bundle.putInt("NumAutomat", NumAutomat);
                         Message message = new Message();
                         message.setData(bundle);

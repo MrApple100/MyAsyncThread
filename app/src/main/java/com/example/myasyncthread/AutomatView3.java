@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -38,10 +41,14 @@ public class AutomatView3 extends Fragment {
         Who = who;
         What = what;
     }
-
+    private static AutomatView3 instance;
+    public static AutomatView3 getInstance() {
+        return instance;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance=this;
     }
 
     @Nullable
@@ -61,12 +68,36 @@ public class AutomatView3 extends Fragment {
 
         GoodAdapter goodAdapter3 = new GoodAdapter(view.getContext(), goodsAutomat3);
         Goodlist3.setAdapter(goodAdapter3);
+        update();
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                AutomatView3 automatView =(AutomatView3) fm.findFragmentById(R.id.automat3holder);
+                //ft.setCustomAnimations(R.anim.animout,R.anim.animin);
+                ft.remove(automatView);
+                ft.remove(AutomatView2.getInstance());
+                ft.remove(AutomatView1.getInstance());
+                ft.remove(AutomatView4.getInstance());
+                ft.commit();
+                fm.executePendingTransactions();
+
+                ft = fm.beginTransaction();
+                BackButton.automat=automatView;
+                ft.add(R.id.Framelayout,automatView);
+                ft.add(R.id.Framelayout,new BackButton());
+                ft.addToBackStack(null);
+                ft.commit();
+
+            }
+        });
+
         return view;
 
     }
 
     public static void update() {
-        System.out.println(State);
         State3.setText(State);
         KolQ3.setText(KolQ);
         Who3.setText(Who);
